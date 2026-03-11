@@ -21,6 +21,12 @@
 #define INTERFACE_TIMER_EN 0x1
 #define INTERFACE_FORCE_PENDING 0x10
 
+static bool disable_pcie_link_reset = false;
+module_param(disable_pcie_link_reset, bool, 0644);
+MODULE_PARM_DESC(disable_pcie_link_reset,
+	"Skip PCIe secondary bus reset (for VFIO/VM environments)");
+
+
 static bool poll_pcie_link_up(struct pci_dev *pdev, u32 timeout_ms) {
 	u16 tt_vendor_id;
 	ktime_t end_time = ktime_add_ms(ktime_get(), timeout_ms);
@@ -65,6 +71,11 @@ bool pcie_hot_reset_and_restore_state(struct pci_dev *pdev) {
 
 	if (!bridge_dev)
 		return false;
+
+	if (disable_pcie_link_reset) {
+		pr_info("tenstorrent: Skipping PCIe link reset (disable_pcie_link_reset=1)\n");
+		return true;
+	}
 
 	pci_ignore_hotplug(pdev);
 
