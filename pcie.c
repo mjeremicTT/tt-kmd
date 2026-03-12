@@ -7,6 +7,7 @@
 
 #include <linux/bitfield.h>
 #include <linux/delay.h>
+#include <linux/moduleparam.h>
 
 #include "module.h"
 #include "device.h"
